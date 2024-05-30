@@ -19,7 +19,11 @@ class PokeTeam {
   clear() {
     this._pokemons = [];
   }
-  
+
+  find(pokemonName) {
+    return this._pokemons.find(pokemon => pokemon.name === pokemonName);
+  }
+
   get length() {
     return this._pokemons.length;
   }

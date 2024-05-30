@@ -6,8 +6,6 @@ import {
   resetAllDivs,
   resetDiv,
   displaySuggestions,
-  findShinyPokemon,
-  findPokemon
 } from "./Render.js";
 import PokeService from "../utils/PokeService.js";
 import PokemonDataMaper from "../factories/PokemonDataMaper.js";
@@ -20,6 +18,7 @@ export const cards = document.querySelectorAll(".display_cards > div");
 export const suggestions = document.querySelectorAll('div')[1];
 
 export default function setupEventListeners(pokeTeam) {
+
   searchButton.addEventListener("click", async (e) => {
     e.preventDefault();
     const searchValue = searchInput.value.toLowerCase();
@@ -38,16 +37,17 @@ export default function setupEventListeners(pokeTeam) {
 
     const pokemonPromise = PokeService.getPokeData(searchValue);
     const pokemon = await PokemonDataMaper.build(pokemonPromise);
+
     searchInput.value = "";
     suggestions.style.display = "none";
     displaySuggestions([]);
+
     pokeTeam.add(pokemon);
     renderPokemon(pokemon, findEmptyCardIndex());
   });
 
   generateTeamButton.addEventListener("click", async (e) => {
     e.preventDefault();
-
     if (pokeTeam.length != 0) {
       pokeTeam.clear();
       resetAllDivs(cards);
@@ -63,7 +63,6 @@ export default function setupEventListeners(pokeTeam) {
 
   addRandomButton.addEventListener("click", async (e) => {
     e.preventDefault();
-
     if (pokeTeam.length > 5) {
       alert(
         "Você já tem 6 pokemons na sua equipe! Remova um para adicionar outro."
@@ -79,13 +78,9 @@ export default function setupEventListeners(pokeTeam) {
 
   document.addEventListener("click", async (e) => {
     e.preventDefault();
-
     if (e.target.classList.contains("remove-button")) {
       const cardDiv = e.target.closest('[class^="card_"]');
-      const pokemonName = e.target
-        .closest("div")
-        .querySelector("h3").textContent
-        .toLowerCase();
+      const pokemonName = cardDiv.querySelector("h3").textContent.toLowerCase();
       pokeTeam.remove(pokemonName);
       resetDiv(cardDiv);
     }
@@ -95,18 +90,13 @@ export default function setupEventListeners(pokeTeam) {
     e.preventDefault();
     if (e.target.classList.contains("shiny-button")) {
       const cardDiv = e.target.closest('[class^="card_"]');
-      const pokemonName = e.target
-        .closest("div")
-        .querySelector("h3").textContent
-        .toLowerCase();
-      const pokemonShiny = findShinyPokemon(pokemonName, pokeTeam.pokemons);
-      const pokemonDefault = findPokemon(pokemonName, pokeTeam.pokemons)
+      const pokemonName = cardDiv.querySelector("h3").textContent.toLowerCase();
+      const spriteShiny = pokeTeam.find(pokemonName).sprites.front_shiny;
+      const spriteDefault = pokeTeam.find(pokemonName).sprites.front_default;
       
-      if (cardDiv.querySelector('img').src === pokemonShiny){
-        cardDiv.querySelector('img').src = pokemonDefault;
-      } else {
-        cardDiv.querySelector('img').src = pokemonShiny;
-      }    
+      cardDiv.querySelector('img').src === spriteShiny ? 
+      cardDiv.querySelector('img').src = spriteDefault : 
+      cardDiv.querySelector('img').src = spriteShiny;
     }
   });
 
@@ -119,11 +109,48 @@ export default function setupEventListeners(pokeTeam) {
 
   document.addEventListener("click", async (e) => {
     e.preventDefault();
-
     if (e.target.classList.contains("suggestion-item")) {
       searchInput.value = e.target.textContent;
       suggestions.style.display = "none";
       displaySuggestions([]);
+    }
+  });
+
+  document.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (e.target.classList.contains("button-previous")) {
+      const cardDiv = e.target.closest('[class^="card_"]');
+      const pokemonName = cardDiv.querySelector("h3").textContent.toLowerCase()
+      const pokemonId = pokeTeam.find(pokemonName).id;
+      const previousPokemon = pokemonId - 1;
+      const cardId = cardDiv.classList.toString().split('_')[1] - 1;
+      
+      if (previousPokemon > 0 && previousPokemon < 1026) {
+        const pokemonPromise = PokeService.getPokeData(previousPokemon);
+        const pokemon = await PokemonDataMaper.build(pokemonPromise);
+        pokeTeam.remove(pokemonName);
+        pokeTeam.add(pokemon);
+        renderPokemon(pokemon, cardId);
+      }
+    }
+  });
+
+  document.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (e.target.classList.contains("button-next")) {
+      const cardDiv = e.target.closest('[class^="card_"]');
+      const pokemonName = cardDiv.querySelector("h3").textContent.toLowerCase()
+      const pokemonId = pokeTeam.find(pokemonName).id;
+      const nextPokemon = pokemonId + 1;
+      const cardId = cardDiv.classList.toString().split('_')[1] - 1;
+
+      if (nextPokemon > 0 && nextPokemon < 1026) {
+        const pokemonPromise = PokeService.getPokeData(nextPokemon);
+        const pokemon = await PokemonDataMaper.build(pokemonPromise);
+        pokeTeam.remove(pokemonName);
+        pokeTeam.add(pokemon);
+        renderPokemon(pokemon, cardId);
+      }
     }
   });
 }

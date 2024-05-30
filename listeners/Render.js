@@ -27,7 +27,11 @@ async function loadPokemonData(card, pokemon, types) {
     setTimeout(() => {
       card.innerHTML = `
               <h3>${firstLetterUpperCase(pokemon.name)}</h3>
-              <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" class="poke_sprite">
+              <div class="navegation">
+                <button class="button-previous">⬅️</button>
+                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" class="poke_sprite">
+                <button class="button-next">➡️</button>
+              </div>
               <ul>
                   ${types}
               </ul>
@@ -68,31 +72,41 @@ export function resetAllDivs(cards) {
 
 export function resetDiv(div) {
   const h3Element = div.querySelector("h3");
+  const imgElement = div.querySelector("img");
+  const ulElement = div.querySelector("ul");
+  const buttonPrevious = div.querySelectorAll("button")[0];
+  const buttonNext = div.querySelectorAll("button")[1];
+  const buttonShiny = div.querySelectorAll("button")[2];
+  const buttonRemover = div.querySelectorAll("button")[3];
+
   if (h3Element) {
     h3Element.textContent = "";
   }
 
-  const imgElement = div.querySelector("img");
   if (imgElement) {
     imgElement.src = "imgs/pokeball.ico";
     imgElement.alt = "";
   }
 
-  const ulElement = div.querySelector("ul");
   if (ulElement) {
     ulElement.innerHTML = "";
   }
-  
-  const buttonElement2 = div.querySelectorAll("button")[1];
-  if (buttonElement2) {
-    buttonElement2.remove();
-  }
-  
-  const buttonElement1 = div.querySelectorAll("button")[0];
-  if (buttonElement1) {
-    buttonElement1.remove();
+
+  if (buttonPrevious) {
+    buttonPrevious.remove();
   }
 
+  if (buttonNext) {
+    buttonNext.remove();
+  }
+
+  if (buttonShiny) {
+    buttonShiny.remove();
+  }
+
+  if (buttonRemover) {
+    buttonRemover.remove();
+  }
 }
 
 export function displaySuggestions(pokemonList) {
@@ -114,16 +128,9 @@ export function displaySuggestions(pokemonList) {
   });
 }
 
-export function findShinyPokemon(pokeName, pokeTeam){
+export function findPokemonId(pokeName, pokeTeam){
   const foundPokemon = pokeTeam.find(pokemon => pokemon.name === pokeName);
   if (foundPokemon) {
-    return foundPokemon.sprites.front_shiny;
-  }
-}
-
-export function findPokemon(pokeName, pokeTeam){
-  const foundPokemon = pokeTeam.find(pokemon => pokemon.name === pokeName);
-  if (foundPokemon) {
-    return foundPokemon.sprites.front_default;
+    return foundPokemon.id;
   }
 }
